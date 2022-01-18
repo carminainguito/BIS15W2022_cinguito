@@ -1,6 +1,6 @@
 ---
 title: "Transforming data 1: Dplyr `select()`"
-date: "`r Sys.Date()`"
+date: "`2022-01-13`"
 output:
   html_document:
     theme: spacelab
@@ -13,7 +13,7 @@ output:
 ## Learning Goals
 *At the end of this exercise, you will be able to:*    
 1. Use summary functions to assess the structure of a data frame.  
-2. Us the select function of `dplyr` to build data frames restricted to variable of interest.  
+2. Use the select function of `dplyr` to build data frames restricted to variable of interest.  
 3. Use the `rename()` function to provide new, consistent names to variables in data frames.  
 
 ## Review
@@ -52,12 +52,13 @@ names(fish)
 ## Tidyverse
 The [tidyverse](www.tidyverse.org) is an "opinionated" collection of packages that make workflow in R easier. The packages operate more intuitively than base R commands and share a common organizational philosophy.  
 ![*Data Science Workflow in the Tidyverse.*](tidy-1.png)  
+variables- columns while observations are seen as rows
 
 ## dplyr
 The first package that we will use that is part of the tidyverse is `dplyr`. `dplyr` is used to transform data frames by extracting, rearranging, and summarizing data such that they are focused on a question of interest. This is very helpful,  especially when wrangling large data, and makes dplyr one of most frequently used packages in the tidyverse. The two functions we will use most are `select()` and `filter()`.  
 
 ## `select()`
-Select allows you to pull out columns of interest from a dataframe. To do this, just add the names of the columns to the `select()` command. The order in which you add them, will determine the order in which they appear in the output.
+Select allows you to pull out columns (variables) of interest from a dataframe. To do this, just add the names of the columns to the `select()` command. The order in which you add them, will determine the order in which they appear in the output.
 ```{r}
 names(fish)
 ```
@@ -142,42 +143,55 @@ mammals <- readr::read_csv("data/mammal_lifehistories_v2.csv")
 
 1. Use one or more of your favorite functions to assess the structure of the data.  
 ```{r}
-
+glimpse(mammals)
 ```
 
 2. Are there any NAs? Are you sure? Try taking an average of `max. life` as a test.  
 ```{r}
+anyNA(mammals)
+```
+```{r}
+x <-mammals[ 11]
+colMeans(x)
+```
 
+```{r}
+summary(mammals)
 ```
 
 3. What are the names of the columns in the `mammals` data?
 ```{r}
-
+colnames(mammals)
 ```
 
 4. Rename any columns that have capitol letters or punctuation issues.  
 ```{r}
-
+mammals_new <- rename(mammals,genus="Genus", mean_mass="wean mass", max_life="max. life", litter_size="litter size", litters_per_year="litters/year")
+mammals_new
 ```
 
 5. We are only interested in the variables `genus`, `species`, and `mass`. Use `select()` to build a new dataframe `mass` focused on these variables.
 ```{r}
-
+mass <- select(mammals_new, "genus", "species","mass")
+mass
+```
+```{r}
+select(mammals_new, "species","genus", "mass")
 ```
 
 6. What if we only wanted to exclude `order` and `family`? Use the `-` operator to make the code efficient.
 ```{r}
-
+select(mammals_new, -order, -family)
 ```
 
 7. Select the columns that include "mass" as part of the name.  
 ```{r}
-
+select(mammals_new, contains("mass"))
 ```
 
 8. Select all of the columns that are of class `character`.  
 ```{r}
-
+select_if(mammals_new, ~is.character(.))
 ```
 
 ## Other
@@ -185,12 +199,15 @@ Here are two examples of code that are super helpful to have in your bag of tric
 
 Imported data frames often have a mix of lower and uppercase column names. Use `toupper()` or `tolower()` to fix this issue. I always try to use lowercase to keep things consistent.  
 ```{r}
-#mammals <- select_all(mammals, tolower)
+mammals <- select_all(mammals, tolower)
+```
+```{r}
+names(mammals)
 ```
 
 When naming columns, blank spaces are often added (don't do this, please). Here is a trick to remove these.  
 ```{r}
-#select_all(mammals, ~str_replace(., " ", "_"))
+select_all(mammals, ~str_replace(., " ", "_"))
 ```
 
 ## That's it! Take a break and I will see you on Zoom!  

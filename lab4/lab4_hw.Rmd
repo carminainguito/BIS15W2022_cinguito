@@ -1,11 +1,11 @@
 ---
 title: "Lab 4 Homework"
-author: "Please Add Your Name Here"
-date: "`r Sys.Date()`"
+author: "Carmina Inguito"
+date: "`2022-01-18`"
 output:
-  html_document:
+  html_document: 
     theme: spacelab
-    toc: no
+    keep_md: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -29,25 +29,141 @@ For the homework, we will use data about vertebrate home range sizes. The data a
 Reference: Tamburello N, Cote IM, Dulvy NK (2015) Energy and the scaling of animal space use. The American Naturalist 186(2):196-211. http://dx.doi.org/10.1086/682070.  
 Data: http://datadryad.org/resource/doi:10.5061/dryad.q5j65/1  
 
+```{r}
+library("janitor")
+```
+
+
 **1. Load the data into a new object called `homerange`.**
+```{r}
+homerange <- readr::read_csv("data/Tamburelloetal_HomeRangeDatabase.csv")
+```
 
 **2. Explore the data. Show the dimensions, column names, classes for each variable, and a statistical summary. Keep these as separate code chunks.**  
+```{r}
+dim(homerange) #dimensions
+```
+```{r}
+colnames(homerange)
+```
+
+```{r}
+summary(homerange)
+```
+
+```{r}
+glimpse(homerange)
+```
 
 **3. Change the class of the variables `taxon` and `order` to factors and display their levels.**  
 
+```{r}
+homerange$taxon <- as.factor(homerange$taxon)
+```
+
+```{r}
+levels(homerange$taxon) #print levels
+```
+
+```{r}
+homerange$order <- as.factor(homerange$order)
+```
+
+```{r}
+levels(homerange$order) #print levels
+```
+
 **4. What taxa are represented in the `homerange` data frame? Make a new data frame `taxa` that is restricted to taxon, common name, class, order, family, genus, species.**  
 
+```{r}
+names(homerange)
+```
+
+```{r}
+homerange <- clean_names(homerange)
+homerange
+```
+
+```{r}
+taxa <-select(homerange, taxon, common_name, class, order, family, genus, species)
+names(taxa)
+```
+
+
 **5. The variable `taxon` identifies the large, common name groups of the species represented in `homerange`. Make a table the shows the counts for each of these `taxon`.**  
+```{r}
+table(homerange$taxon)
+```
+```{r}
+homerange %>% 
+  group_by(taxon) %>% 
+  count() %>% 
+  ggplot(aes(x=taxon, y=n))+
+  geom_col()
+```
+
 
 **6. The species in `homerange` are also classified into trophic guilds. How many species are represented in each trophic guild.**  
 
-**7. Make two new data frames, one which is restricted to carnivores and another that is restricted to herbivores.**  
+```{r}
+tabyl(homerange, trophic_guild)
+```
+
+There are 342 carnivores and 227 herbivores.
+
+**7. Make two new data frames, one which is restricted to carnivores and another that is restricted to herbivores.** 
+```{r}
+carnivores <-filter(homerange, trophic_guild=="carnivore")
+herbivores <-filter(homerange, trophic_guild=="herbivore" )
+```
+
 
 **8. Do herbivores or carnivores have, on average, a larger `mean.hra.m2`? Remove any NAs from the data.**  
+```{r}
+mean(herbivores$mean_hra_m2,na.rm=T)
+```
+
+```{r}
+mean(carnivores$mean_hra_m2,na.rm=T)
+```
+Herbivores have on average, a larger mean_hra_m2.
 
 **9. Make a new dataframe `deer` that is limited to the mean mass, log10 mass, family, genus, and species of deer in the database. The family for deer is cervidae. Arrange the data in descending order by log10 mass. Which is the largest deer? What is its common name?**  
+```{r}
+names(homerange)
+```
+
+```{r}
+deer <- select(homerange,mean_mass_g, log10_mass, family, genus, species)
+```
+
+```{r}
+deer_final <- filter(deer,family=="cervidae")
+deer_final
+```
+
+
+```{r}
+arrange(deer_final, desc(log10_mass))
+```
+
+```{r}
+max_deer_weight <- max(deer_final$mean_mass_g)
+max_deer_weight #largest deer
+```
+The largest deer is the species "alces" which translates to its common name as a moose! 
 
 **10. As measured by the data, which snake species has the smallest homerange? Show all of your work, please. Look this species up online and tell me about it!** **Snake is found in taxon column**    
+```{r}
+snakes <- filter(homerange, taxon == "snakes") #filtering homerange so that there's only snake data
+snakes <- select(snakes, "common_name", "genus", "species","mean_hra_m2")
+```
+
+```{r}
+arrange(snakes, mean_hra_m2)
+```
+
+The Namaqua Dwarf Adder has the smallest homerange of the species. It's a fascinating snake that can been found usually in Northern Cape as well as south-western part of Namibia which consists of coastal sand dunes. They tend to eat lizards, small mammals, and frogs/toads. This specie is considered the smallest adder and lives roughly for 10 years! 
 
 ## Push your final code to GitHub!
 Please be sure that you check the `keep md` file in the knit preferences.   
