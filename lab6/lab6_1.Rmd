@@ -1,6 +1,6 @@
 ---
 title: "`summarize()`, `tabyl()`, and `group_by()`"
-date: "`r Sys.Date()`"
+date: "`2022-01-20`"
 output:
   html_document:
     theme: spacelab
@@ -83,13 +83,18 @@ msleep24 %>%
 ## Practice
 1. Which taxonomic orders have species that belong to more than one class of `vore`?
 ```{r}
-
+names(msleep)
+```
+```{r}
+msleep %>% 
+  filter(!is.na(vore)) %>% #note that question is asking for taxonomic orders
+  tabyl(vore, order)
 ```
 
 ## `summarize()`
 `summarize()` will produce summary statistics for a given variable in a data frame. For example, if you are asked to calculate the mean of `sleep_total` for large and small mammals you could do this using a combination of commands, but it isn't very efficient or clean. We can do better!  
 ```{r}
-head(msleep)
+head(msleep) #view sleep_total variable
 ```
 
 For example, if we define "large" as having a `bodywt` greater than 200 then we get the following:
@@ -110,7 +115,7 @@ We can accomplish the same task using the `summarize()` function to make things 
 ```{r}
 msleep %>% 
   filter(bodywt > 200) %>% #large mammals
-  summarize(mean_sleep_lg = mean(sleep_total))
+  summarize(mean_sleep_lg = mean(sleep_total)) #give new name of variable 
 ```
 
 You can also combine functions to make useful summaries for multiple variables.
@@ -126,7 +131,12 @@ msleep %>%
 ## Practice
 1. What is the mean, min, and max `bodywt` for the taxonomic order Primates? Provide the total number of observations.
 ```{r}
-
+msleep %>%
+  filter(order=="Primates") %>%
+  summarise(mean_bodywt=mean(bodywt),
+            min_bodywt=min(bodywt),
+            max_bodywt=max(bodywt),
+            n_samples=n()) #provide total number of observations
 ```
 
 `n_distinct()` is a very handy way of cleanly presenting the number of distinct observations. Here we show the number of distinct genera over 100 in body weight.
