@@ -49,20 +49,26 @@ Here we add a new column of expenditure types, which are stored as rownames abov
 ```{r}
 expenditures <- 
   USPersonalExpenditure %>% 
-  as_tibble() %>% 
-  mutate(expenditure = rownames(USPersonalExpenditure))
+  as_tibble() %>% #makes the data into a data frame
+  mutate(expenditure = rownames(USPersonalExpenditure)) #pivot the year
 expenditures
 ```
 
 ## Practice
 1. Are these data tidy? Please use `pivot_longer()` to tidy the data.
 ```{r}
-
+expenditures_long <- expenditures %>% 
+  pivot_longer(-expenditure, #don't move expenditure
+               names_to="year",
+               values_to = "bn_dollars")
+expenditures_long
 ```
 
 2. Restrict the data to medical and health expenditures only. Sort in ascending order.
 ```{r}
-
+expenditures_long %>%
+  filter(expenditures=="Medical and Health") %>%
+  arrange(bn_dollars)
 ```
 
 ## `separate()`
@@ -81,12 +87,19 @@ heartrate2 %>%
 ## Practice
 1. Re-examine `heartrate2`. Use `separate()` for the sexes, `pivot_longer()` to tidy, and `arrange()` to organize by patient and drug. Store this as a new object `heartrate3`.  
 ```{r}
-
+heartrate3 <-heartrate2 %>%
+  separate(patient, into=c("patient", "sex"), sep="_") %>%
+  pivot_longer(-c(patient, sex), 
+               names_to="drug",
+               values_to = "heartrate"
+               ) %>%
+  arrange(drug, heartrate)
 ```
 
 2. `unite()` is the opposite of separate(). Its syntax is straightforward. You only need to give a new column name and then list the columns to combine with a separation character.  Give it a try below by recombining patient and sex from `heartrate3`.  
 ```{r}
-
+heartrate3 %>%
+  unite(patient_sex,"patient", "sex", sep="_")
 ```
 
 ## `pivot_wider()`
@@ -135,13 +148,16 @@ edu_level %>%
 pivot_wider(names_from = (education_level), #new column names come from the education_level column
                 values_from = c(mean_income, n)) #values come from two separate columns
 ```
-
+column names are observations - untidy data 
 ## Practice
 For the last practice example, I will use data from the awesome [R Ladies Sydney](https://rladiessydney.org/courses/ryouwithme/02-cleanitup-5/) blog. This data set is compiled by the NSW Office of Environment and Heritage contains the enterococci counts in water samples obtained from Sydney beaches as part of the Beachwatch Water Quality Program! The data set we’ll be working with is current as of October 13th 2018.  
+```{r}
+getwd()
+```
 
 1. Load the beachbugs data and have a look.
 ```{r}
-
+beachbugs <- readr::read_csv("data/ beachbugs_long.csv")
 ```
 
 2. Use `pivot_wider` to transform the data into wide format.
