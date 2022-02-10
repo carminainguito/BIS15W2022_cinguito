@@ -77,7 +77,7 @@ ggplot(data=iris, mapping=aes(x=Species, y=Petal.Length))+geom_boxplot()
 ## Practice
 1. Use the iris data to build a scatterplot that compares sepal length vs. sepal width. Use the cheat sheet or help to find the correct `geom_` for a scatterplot.
 ```{r}
-
+ggplot(data=iris, mapping=aes(x=Sepal.Width, y=Sepal.Length))+geom_point()
 ```
 
 ```{r}
@@ -99,13 +99,16 @@ homerange <- read_csv(here("lab9", "data", "Tamburelloetal_HomeRangeDatabase.csv
 ## Practice
 1. What is the structure of the `homerange` data? Does it have any NA's? Is it tidy? Do a quick exploratory analysis of your choice below.
 ```{r}
-
+naniar::miss_var_summary(homerange)
 ```
 
 ```{r}
-
+skim(homerange)
 ```
 
+```{r}
+glimpse(homerange)
+```
 
 ### 1. Scatter Plots
 Scatter plots are good at revealing relationships that are not readily visible in the raw data. For now, we will not add regression lines or calculate any r^2^ values.  
@@ -135,15 +138,12 @@ ggplot(data=homerange, mapping=aes(x=log10.mass, y=log10.hra)) +
 ### Practice
 1. What is the relationship between log10.hra and log10.preymass? What do you notice about how ggplot treats NA's?
 ```{r}
-
-```
-
-```{r}
-
+ggplot(data=homerange, mapping=aes(x=log10.preymass, y=log10.hra)) +
+  geom_point(na.rm=T) #by default gg plot is going to remove the NAs 
 ```
 
 ### Bar Plot: `geom_bar()`
-The simplest type of bar plot counts the number of observations in a categorical variable. In this case, we want to know how many observations are present in the variable `trophic.guild`. Notice that we do not specify a y-axis because it is count by default.  
+The simplest way of bar plot counts the number of observations in a categorical variable. In this case, we want to know how many observations are present in the variable `trophic.guild`. Notice that we do not specify a y-axis because it is count by default.  
 
 ```{r}
 names(homerange)
@@ -151,7 +151,7 @@ names(homerange)
 
 ```{r}
 homerange %>% 
-  count(trophic.guild)
+  count(trophic.guild) #group by is the same way to do this (then summary), given categorical and count
 ```
 
 Also notice that we can use pipes! The `mapping=` function is implied by `aes` and so is often left out. 
@@ -166,8 +166,9 @@ Unlike `geom_bar()`, `geom_col()` allows us to specify an x-axis and a y-axis.
 ```{r}
 homerange %>% 
   filter(family=="salmonidae") %>% 
-  ggplot(aes(x=common.name, y=log10.mass))+
-  geom_col()
+  select(common.name, log10.mass) %>%
+  ggplot(aes(x=common.name, y=log10.mass))+ 
+  geom_col() #have an x and y 
 ```
 
 `geom_bar()` with `stat="identity"`
@@ -185,17 +186,21 @@ homerange %>%
   group_by(class) %>% 
   summarize(mean_body_wt=mean(log10.mass)) %>% 
   ggplot(aes(x=class, y=mean_body_wt))+
-  geom_col()
+  geom_col() #preferred 
 ```
 
 ## Practice
 1. Filter the `homerange` data to include `mammals` only.
 ```{r}
-
+mammals <- homerange %>%
+  filter(class=="mammalia")
 ```
 
 ```{r}
-
+homerange %>% 
+  filter(family=="mammals") %>% 
+  ggplot(aes(x=common.name, y=log10.mass))+
+  geom_bar(stat="identity")
 ```
 
 ```{r}
@@ -205,17 +210,27 @@ homerange %>%
 
 2. Are there more herbivores or carnivores in mammals? Make a bar plot that shows their relative numbers.
 ```{r}
-
+homerange %>% 
+  filter(family=="herbivores") %>% 
+  ggplot(aes(x=common.name, y=log10.mass))+
+  geom_bar(stat="identity") 
 ```
 
 ```{r}
-
+homerange %>% 
+  filter(family=="carnivores") %>% 
+  ggplot(aes(x=common.name, y=log10.mass))+
+  geom_bar(stat="identity")
 ```
 
 
 3. Make a bar plot that shows the masses of the top 10 smallest mammals.
 ```{r}
-
+mammals %>%
+  top_n(-10, log10.mass) %>%
+  ggplot(aes(x=common.name, y=log10.mass)) +
+  geom_col()+ #geom_bar(stat="identity)+
+  coord_flip()
 ```
 
 ```{r}
