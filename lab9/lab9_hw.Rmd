@@ -136,7 +136,7 @@ This plot demonstrates that the higher the cost, the higher the completion rate.
 ```{r}
 uc_college <- colleges %>% 
   group_by(instnm) %>% 
-  filter_all(any_vars(str_detect(., "University of California")))
+  filter_all(any_vars(str_detect(., "University of California"))) #period means check every cell
 uc_college 
 ```
 
