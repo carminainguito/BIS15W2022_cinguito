@@ -1,11 +1,11 @@
 ---
 title: "Lab 12 Homework"
-author: "Please Add Your Name Here"
-date: "`r Sys.Date()`"
+author: "Carmina Inguito"
+date: "`2022-02-24`"
 output:
-  html_document:
+  html_document: 
     theme: spacelab
-    toc: no
+    keep_md: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -23,7 +23,6 @@ library(tidyverse)
 library(janitor)
 library(here)
 library(ggmap)
-library(albersusa)
 ``` 
 
 ## Load the Data
@@ -32,74 +31,109 @@ We will use two separate data sets for this homework.
 1. The first [data set](https://rcweb.dartmouth.edu/~f002d69/workshops/index_rspatial.html) represent sightings of grizzly bears (Ursos arctos) in Alaska.  
 2. The second data set is from Brandell, Ellen E (2021), Serological dataset and R code for: Patterns and processes of pathogen exposure in gray wolves across North America, Dryad, [Dataset](https://doi.org/10.5061/dryad.5hqbzkh51).  
 
-1. Load the `grizzly` data and evaluate its structure. As part of this step, produce a summary that provides the range of latitude and longitude so you can build an appropriate bounding box.
+**1. Load the `grizzly` data and evaluate its structure. As part of this step, produce a summary that provides the range of latitude and longitude so you can build an appropriate bounding box.**
 ```{r}
-
+grizzly <- read_csv(here("lab12", "data", "bear-sightings.csv")) %>% clean_names()
 ```
 
 ```{r}
-
-```
-
-2. Use the range of the latitude and longitude to build an appropriate bounding box for your map.
-```{r}
-
-```
-
-3. Load a map from `stamen` in a terrain style projection and display the map.
-```{r}
-
+summary(grizzly)
 ```
 
 ```{r}
-
+names(grizzly)
+```
+*Summary of Grizzly Data*
+```{r}
+grizzly %>% 
+  select(latitude, longitude) %>% 
+  summary()
 ```
 
-4. Build a final map that overlays the recorded observations of grizzly bears in Alaska.
+**2. Use the range of the latitude and longitude to build an appropriate bounding box for your map.**
 ```{r}
-
+lat <- c(55.02, 70.37)
+long <- c(-166.2, -131.3)
+bbox <-make_bbox(long,lat, f=0.05)
 ```
 
-5. Let's switch to the wolves data. Load the data and evaluate its structure.
+**3. Load a map from `stamen` in a terrain style projection and display the map.**
 ```{r}
-
+map_grizzly <- get_map(bbox, maptype = "terrain", source = "stamen")
 ```
 
-6. How many distinct wolf populations are included in this study? Mae a new object that restricts the data to the wolf populations in the lower 48 US states.
+**4. Build a final map that overlays the recorded observations of grizzly bears in Alaska.**
 ```{r}
+ggmap(map_grizzly)+
+  geom_point(data=grizzly,aes(longitude,latitude))+
+  labs(x="Longitude", y="Latitude", title="Grizzly Bears in Alaska")+
+  theme(plot.title=element_text(face="bold",hjust=0.5))
+```
 
+
+**Let's switch to the wolves data. Brandell, Ellen E (2021), Serological dataset and R code for: Patterns and processes of pathogen exposure in gray wolves across North America, Dryad, [Dataset](https://doi.org/10.5061/dryad.5hqbzkh51).**  
+
+**5. Load the data and evaluate its structure.** 
+```{r}
+wolves <- read_csv(here("lab12", "data", "wolves_data", "wolves_dataset.csv")) %>% clean_names()
 ```
 
 ```{r}
-
-```
-
-7. Use the `albersusa` package to make a base map of the lower 48 US states.
-```{r}
-
+glimpse(wolves)
 ```
 
 ```{r}
-
+summary(wolves)
 ```
 
 ```{r}
-
+names(wolves)
 ```
 
-8. Use the relimited data to plot the distribution of wolf populations in the lower 48 US states.
+**6. How many distinct wolf populations are included in this study? Make a new object that restricts the data to the wolf populations in the lower 48 US states.**
 ```{r}
-
+wolves %>%
+  count(pop)
 ```
 
-9. What is the average pack size for the wolves in this study by region?
 ```{r}
-
+america_wolves <- wolves %>%
+  filter(pop %in% c("MT", "SNF", "GTNP", "MI", "MEXICAN", "YNP"))
+america_wolves
 ```
 
-10. Make a new map that shows the distribution of wolves in the lower 48 US states but which has the size of location markers adjusted by pack size.
+**7. Use the range of the latitude and longitude to build an appropriate bounding box for your map.**
 ```{r}
+america_wolves %>%
+  select(long,lat) %>%
+  summary()
+```
 
+```{r}
+lat <- c(33.89, 47.75)
+long <- c(-110.99, -86.82)
+bbox <- make_bbox(long,lat, f=0.05)
+```
+
+**8.  Load a map from `stamen` in a `terrain-lines` projection and display the map.**
+```{r}
+map_wolves<-get_map(bbox, maptype="terrain-lines", source="stamen")
+```
+
+```{r}
+ggmap(map_wolves)
+```
+
+**9. Build a final map that overlays the recorded observations of wolves in the lower 48 states.**
+```{r}
+ggmap(map_wolves)+ geom_point(data=america_wolves, mapping=aes(x=long, y=lat), size=0.8)+labs(x="Longitude", y="Latitude", title="Wolves in United States")+
+theme(plot.title=element_text(face="bold",hjust=0.5))
+```
+
+**10. Use the map from #9 above, but add some aesthetics. Try to `fill` and `color` by population.**
+```{r}
+ggmap(map_wolves)+ geom_point(data=america_wolves, mapping=aes(x=long, y=lat, color=pop, fill=pop), size=2)+labs(x="Longitude", y="Latitude", title="Wolves in Bottom States")+
+  theme(plot.title=element_text(face="bold",hjust=0.5))
 ```
 
 ## Push your final code to GitHub!

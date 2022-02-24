@@ -148,6 +148,8 @@ ggplot() +
   geom_point(data = spiders, aes(longitude, latitude))
 ```
 
+longitude and latitude data 
+
 We can spice things up a bit by adding aesthetics.
 ```{r}
 ggplot() +
