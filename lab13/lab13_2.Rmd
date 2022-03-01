@@ -214,7 +214,7 @@ server <- function(input, output, session) {
   output$plot <- renderPlot({
   ggplot(penguins, aes_string(x = input$x, y = input$y, color="species")) + geom_point(size=input$pointsize, alpha=0.8) + theme_light(base_size = 18)
   })
-  session$onSessionEnded(stopApp)
+  session$onSessionEnded(stopApp) 
   }
 
 shinyApp(ui, server)
