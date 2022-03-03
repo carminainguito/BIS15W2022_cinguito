@@ -16,7 +16,7 @@ output:
 
 ```{r}
 install.packages("ggVennDiagram")
-
+install.packages("ggwordcloud")
 ```
 ```{r}
 install.packages("ggworldcloud")
@@ -116,12 +116,15 @@ Try making a violin plot of taxon from the homerange data:
  1. Remind yourself what the data look like:
 
 ```{r}
-
+names(penguins)
 ```
 
   2. Make a violin plot of `log10.mass` by `taxon`, and a box plot of `log10.mass` by `taxon`. You can use 1 or 2 plots.
 ```{r}
-
+penguins %>% 
+  ggplot(aes(x = taxon, y = log10.mass, fill = taxon)) +
+  geom_boxplot(color = "grey", alpha = .3, na.rm = TRUE)
+  geom_violin(alpha = .3, na.rm = TRUE) +
 ```
 
 3. What information can you gather from the violin plot that might have been missed with the box plot?
@@ -150,7 +153,7 @@ heartrate_long
 heartrate_long %>%
   ggplot(aes(patient, drug, fill= heartrate)) + 
   geom_tile() +
-  scale_fill_gradient(low="yellow", high="red")
+  scale_fill_gradient(low="blue", high="purple")
 ```
 
 Now, let's instead look at how each drug changed the heartrate from the normal, using mutate
@@ -169,18 +172,31 @@ heartrate_diff
 heartrate_diff %>% 
   ggplot(aes(patient, drug, fill= heartrate)) + 
   geom_tile()+
-  scale_fill_gradient2(low="green", mid = "white", high="red")
+  scale_fill_gradient2(low="blue", mid = "white", high="pink")
 # scale_fill_graient2 lets you set a color direction for zero (mid), positive (high), and negative (low)
 ```
 
 
 ## Practice
   1. Which drug lowers heart rate? raises it?
+```{r}
+heartrate_diff <- heartrate %>%
+  mutate(across(c(a,b,c,d), ~ . - no_drug)) %>% 
+  select(-no_drug) %>% 
+    pivot_longer(-patient, #patient does not pivot
+               names_to = "drug", 
+               values_to = "heartrate"
+               ) 
+heartrate_diff 
+```
 
   2. Make a heat map for body mass by species & sex for penguins
 
 ```{r}
-
+penguins %>%
+  ggplot(aes(x= species, y=sex, fill= body_mass_g))+
+  geom_title()+
+  scale_fill_gradient2(low="red", high="blue")
 ```
 
 
